@@ -1,13 +1,17 @@
-import { Search, ShoppingBag, MessageSquare, User, Menu } from 'lucide-react';
+import { useState } from 'react';
+import { Search, ShoppingBag, MessageSquare, User, Menu, LogOut, LayoutGrid } from 'lucide-react';
 import { useAuth } from '../contexts/AuthContext';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
   onMenuClick?: () => void;
+  onProfileClick?: () => void;
+  onDashboardClick?: () => void;
 }
 
-export function Header({ onSearch, onMenuClick }: HeaderProps) {
-  const { profile } = useAuth();
+export function Header({ onSearch, onMenuClick, onProfileClick, onDashboardClick }: HeaderProps) {
+  const { profile, signOut } = useAuth();
+  const [showMenu, setShowMenu] = useState(false);
 
   return (
     <header className="bg-white border-b border-gray-200 sticky top-0 z-50">
@@ -44,19 +48,61 @@ export function Header({ onSearch, onMenuClick }: HeaderProps) {
             <button className="relative">
               <ShoppingBag className="w-6 h-6 text-gray-700" />
             </button>
-            <button className="flex items-center gap-2">
-              {profile?.avatar_url ? (
-                <img
-                  src={profile.avatar_url}
-                  alt={profile.full_name}
-                  className="w-8 h-8 rounded-full"
-                />
-              ) : (
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <User className="w-5 h-5 text-gray-600" />
+            {profile?.role === 'seller' && (
+              <button
+                onClick={() => {
+                  onDashboardClick?.();
+                  setShowMenu(false);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Seller Dashboard"
+              >
+                <LayoutGrid className="w-6 h-6 text-gray-700" />
+              </button>
+            )}
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="flex items-center gap-2 hover:bg-gray-100 rounded-lg p-1 transition-colors"
+              >
+                {profile?.avatar_url ? (
+                  <img
+                    src={profile.avatar_url}
+                    alt={profile.full_name}
+                    className="w-8 h-8 rounded-full"
+                  />
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                    <User className="w-5 h-5 text-gray-600" />
+                  </div>
+                )}
+              </button>
+
+              {showMenu && (
+                <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg py-1 z-10">
+                  <button
+                    onClick={() => {
+                      onProfileClick?.();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-gray-700"
+                  >
+                    <User className="w-4 h-4" />
+                    My Profile
+                  </button>
+                  <button
+                    onClick={() => {
+                      signOut();
+                      setShowMenu(false);
+                    }}
+                    className="w-full text-left px-4 py-2 hover:bg-gray-100 flex items-center gap-2 text-red-600 border-t border-gray-200"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Logout
+                  </button>
                 </div>
               )}
-            </button>
+            </div>
           </div>
         </div>
 
